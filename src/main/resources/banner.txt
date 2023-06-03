@@ -1,0 +1,9 @@
+By:  ${AnsiColor.RED}
+    __  ___           _      __   ______                       ____        
+   /  |/  /_  _______(_)__  / /  / ____/___ _______   ______ _/ / /_  ____ 
+  / /|_/ / / / / ___/ / _ \/ /  / /   / __ `/ ___/ | / / __ `/ / __ \/ __ \
+ / /  / / /_/ / /  / /  __/ /  / /___/ /_/ / /   | |/ / /_/ / / / / / /_/ /
+/_/  /_/\__,_/_/  /_/\___/_/   \____/\__,_/_/    |___/\__,_/_/_/ /_/\____/ 
+                                                                           
+${AnsiColor.DEFAULT}App Name: ${application.name} - Version: ${application.versao}
+Powered by Spring Boot ${spring-boot.version} on java ${java.version}
