@@ -2,6 +2,7 @@ package br.com.dbc.votacao.dtos;
 
 import br.com.dbc.votacao.models.Pauta;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.NonNull;
@@ -17,7 +18,9 @@ public class VotacaoDto {
         }
     }
 
-    @NotBlank
-    private Long idPauta;
+    @NotBlank(groups = VotacaoDto.VotacaoView.RegistroVotacao.class)
+    @JsonView(VotacaoDto.VotacaoView.RegistroVotacao.class)
+    private String idPauta;
+    @JsonView(VotacaoDto.VotacaoView.RegistroVotacao.class)
     private LocalDateTime fimVotacao;
 }
