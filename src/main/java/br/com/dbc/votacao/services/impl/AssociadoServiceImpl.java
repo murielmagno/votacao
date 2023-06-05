@@ -54,5 +54,10 @@ public class AssociadoServiceImpl implements AssociadoService {
         }
     }
 
+    @Override
+    public Optional<Associado> buscarAssociadoPeloCpf(String cpf) {
+        return associadoRepository.findAssociadoByCpf(cpf);
+    }
+
 
 }

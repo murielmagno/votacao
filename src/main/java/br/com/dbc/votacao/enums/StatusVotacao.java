@@ -4,7 +4,7 @@ public enum StatusVotacao {
 
     ABERTA(0,"Votação aberta"),
     CANCELADA(1,"Votação cancelada"),
-    CONCLUIDA(2,"Votação concluída");
+    ENCERRADA(2,"Votação encerrada");
 
     private int codigo;
     private String descricao;

@@ -1,6 +1,8 @@
 package br.com.dbc.votacao.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.util.UUID;
@@ -18,7 +20,8 @@ public class PautaDto {
     }
 
     private UUID id;
-
+    @NotBlank(groups = PautaDto.PautaView.RegistroPauta.class)
+    @JsonView(PautaDto.PautaView.RegistroPauta.class)
     private String descricao;
 
 }

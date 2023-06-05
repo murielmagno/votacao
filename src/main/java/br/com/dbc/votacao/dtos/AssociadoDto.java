@@ -1,6 +1,7 @@
 package br.com.dbc.votacao.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.hibernate.validator.constraints.br.CPF;
@@ -16,7 +17,8 @@ public class AssociadoDto {
     }
 
     private Long id;
-    @NotBlank
+    @NotBlank(groups = AssociadoDto.AssociadoView.RegistroAssociado.class)
+    @JsonView(AssociadoDto.AssociadoView.RegistroAssociado.class)
     @CPF
     private String cpf;
 
