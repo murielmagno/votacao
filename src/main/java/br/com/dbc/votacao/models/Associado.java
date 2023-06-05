@@ -6,8 +6,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.validator.constraints.br.CPF;
 
-import java.util.UUID;
-
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
@@ -18,7 +16,7 @@ public class Associado {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID Id;
+    private Long Id;
 
     @CPF
     @Column(nullable = false, length = 20)

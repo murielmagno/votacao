@@ -5,8 +5,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 public class AssociadoTest {
-
     @Test
-    void contextLoads() {
+    public void criarAssociado() {
+        System.out.println("aquui");
+
     }
 }
