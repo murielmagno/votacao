@@ -16,6 +16,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static br.com.dbc.votacao.utils.ToJson.asJsonString;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -61,13 +62,5 @@ public class UsuarioControllerTest {
                 .delete("/usuario/teste").contentType(APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk()).andReturn().getResponse();
         Assert.assertEquals(200,response.getStatus());
-    }
-
-    public static String asJsonString(final Object obj) {
-        try {
-            return new ObjectMapper().writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }
