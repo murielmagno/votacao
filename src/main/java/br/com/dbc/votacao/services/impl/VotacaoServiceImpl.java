@@ -49,25 +49,7 @@ public class VotacaoServiceImpl implements VotacaoService {
         if (pauta.isPresent()) {
             var votacaoExistente = votacaoRepository.findVotacaoByPauta(pauta.get());
             if (!votacaoExistente.isPresent()) {
-                var votacao = new Votacao();
-                votacao.setPauta(pauta.get());
-                votacao.setInicioVotacao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
-                votacao.setStatusVotacao(StatusVotacao.ABERTA);
-                votacao.setVotosFavoraveis(0);
-                votacao.setVotosContra(0);
-                votacao.setTotalDeVotos(0);
-                if ((votacaoDto.getFimVotacao() != null) && !votacaoDto.getFimVotacao().equals("")
-                        && votacaoDto.getFimVotacao().isAfter(dateTimeNow)) {
-                    votacao.setFimVotacao(votacaoDto.getFimVotacao());
-                } else {
-                    votacao.setFimVotacao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")).plusMinutes(1));
-                }
-                votacaoRepository.save(votacao);
-                var log = new VotacaoLog();
-                log.setDescricao("Pauta " + pauta.get().getDescricao() + " teve sua votação iniciada!");
-                log.setDataCriacao(dateTimeNow);
-                votacaoLogService.salvarLog(log);
-                return ResponseEntity.status(HttpStatus.CREATED).body("Votação Iniciada!");
+                return montarVotacao(votacaoDto, pauta, dateTimeNow);
             } else {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Votação para essa pauta já aconteceu!");
             }
@@ -109,25 +91,9 @@ public class VotacaoServiceImpl implements VotacaoService {
                             && !votacao.get().getListaDeVotantes().contains(associado.get())) {
                         var associadosQueVotaram = new ArrayList<Associado>();
                         if (voto.getVoto().equalsIgnoreCase("sim")) {
-                            LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
-                            associadosQueVotaram.add(associado.get());
-                            votacao.get().setListaDeVotantes(associadosQueVotaram);
-                            votacao.get().setVotosFavoraveis(votacao.get().getVotosFavoraveis() + 1);
-                            log.setDataCriacao(dateTimeNow);
-                            log.setDescricao("Voto do associado " + associado.get().getCpf() + " computado com sucesso!");
-                            votacaoLogService.salvarLog(log);
-                            votacaoRepository.saveAndFlush(votacao.get());
-                            return ResponseEntity.status(HttpStatus.OK).body("Voto realizado com sucesso.");
+                            return setarVotoFavoravel(log, associado, votacao, associadosQueVotaram);
                         } else if (voto.getVoto().equalsIgnoreCase("não")) {
-                            LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
-                            associadosQueVotaram.add(associado.get());
-                            votacao.get().setListaDeVotantes(associadosQueVotaram);
-                            votacao.get().setVotosContra(votacao.get().getVotosContra() + 1);
-                            log.setDataCriacao(dateTimeNow);
-                            log.setDescricao("Voto do associado " + associado.get().getCpf() + " computado com sucesso!");
-                            votacaoLogService.salvarLog(log);
-                            votacaoRepository.saveAndFlush(votacao.get());
-                            return ResponseEntity.status(HttpStatus.OK).body("Voto realizado com sucesso.");
+                            return setarVotoContra(log, associado, votacao, associadosQueVotaram);
                         } else {
                             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Voto invalído, utilize SIM ou NÃO para votar.");
                         }
@@ -144,4 +110,51 @@ public class VotacaoServiceImpl implements VotacaoService {
             return ResponseEntity.status(HttpStatus.OK).body("Inapto a votar");
         }
     }
+
+    private ResponseEntity<Object> montarVotacao(VotacaoDto votacaoDto, Optional<Pauta> pauta, LocalDateTime dateTimeNow) {
+        var votacao = new Votacao();
+        votacao.setPauta(pauta.get());
+        votacao.setInicioVotacao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
+        votacao.setStatusVotacao(StatusVotacao.ABERTA);
+        votacao.setVotosFavoraveis(0);
+        votacao.setVotosContra(0);
+        votacao.setTotalDeVotos(0);
+        if ((votacaoDto.getFimVotacao() != null) && !votacaoDto.getFimVotacao().equals("")
+                && votacaoDto.getFimVotacao().isAfter(dateTimeNow)) {
+            votacao.setFimVotacao(votacaoDto.getFimVotacao());
+        } else {
+            votacao.setFimVotacao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")).plusMinutes(1));
+        }
+        votacaoRepository.save(votacao);
+        var log = new VotacaoLog();
+        log.setDescricao("Pauta " + pauta.get().getDescricao() + " teve sua votação iniciada!");
+        log.setDataCriacao(dateTimeNow);
+        votacaoLogService.salvarLog(log);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Votação Iniciada!");
+    }
+
+    private ResponseEntity<Object> setarVotoFavoravel(VotacaoLog log, Optional<Associado> associado, Optional<Votacao> votacao, ArrayList<Associado> associadosQueVotaram) {
+        LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
+        associadosQueVotaram.add(associado.get());
+        votacao.get().setListaDeVotantes(associadosQueVotaram);
+        votacao.get().setVotosFavoraveis(votacao.get().getVotosFavoraveis() + 1);
+        log.setDataCriacao(dateTimeNow);
+        log.setDescricao("Voto do associado " + associado.get().getCpf() + " computado com sucesso!");
+        votacaoLogService.salvarLog(log);
+        votacaoRepository.saveAndFlush(votacao.get());
+        return ResponseEntity.status(HttpStatus.OK).body("Voto realizado com sucesso.");
+    }
+
+    private ResponseEntity<Object> setarVotoContra(VotacaoLog log, Optional<Associado> associado, Optional<Votacao> votacao, ArrayList<Associado> associadosQueVotaram) {
+        LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
+        associadosQueVotaram.add(associado.get());
+        votacao.get().setListaDeVotantes(associadosQueVotaram);
+        votacao.get().setVotosContra(votacao.get().getVotosContra() + 1);
+        log.setDataCriacao(dateTimeNow);
+        log.setDescricao("Voto do associado " + associado.get().getCpf() + " computado com sucesso!");
+        votacaoLogService.salvarLog(log);
+        votacaoRepository.saveAndFlush(votacao.get());
+        return ResponseEntity.status(HttpStatus.OK).body("Voto realizado com sucesso.");
+    }
+
 }

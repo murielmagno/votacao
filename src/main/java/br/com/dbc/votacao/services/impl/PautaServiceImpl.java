@@ -7,6 +7,9 @@ import br.com.dbc.votacao.repositories.PautaRepository;
 import br.com.dbc.votacao.services.PautaService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -50,6 +53,11 @@ public class PautaServiceImpl implements PautaService {
     @Override
     public Optional<Pauta> buscarPautaPorId(Long id) {
         return pautaRepository.findById(id);
+    }
+
+    @Override
+    public Page<Pauta> buscarTodasAsPautas(Specification<Pauta> spec, Pageable pageable) {
+        return pautaRepository.findAll(spec,pageable);
     }
 
 

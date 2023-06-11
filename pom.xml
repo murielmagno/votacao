@@ -87,9 +87,9 @@
 			<version>0.9.1</version>
 		</dependency>
 		<dependency>
-			<groupId>com.github.marcoslima</groupId>
-			<artifactId>cpf-utils</artifactId>
-			<version>1.0</version>
+			<groupId>net.kaczmarzyk</groupId>
+			<artifactId>specification-arg-resolver</artifactId>
+			<version>3.1.0</version>
 		</dependency>
 	</dependencies>
 

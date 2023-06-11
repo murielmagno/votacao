@@ -16,10 +16,8 @@ import java.util.Map;
 @Service
 public class JwtServiceImpl implements JwtService {
 
-    @Value("{apllication.auth.jwtSecret}")
-    private String SECRET_KEY;
-    @Value("{apllication.auth.jwtExpiration}")
-    private String EXPIRATION_TIME;
+    private String SECRET_KEY = "Zr4u7x!A%D*G-KaPdSgVkYp2s5v8y/B?E(H+MbQeThWmZq4t6w9z$C&F)J@NcRfU";
+    private Long EXPIRATION_TIME = 1800000L;
 
     public String gerarToken(String nomeDoUsuario) {
         Map<String, Object> claims = new HashMap<>();

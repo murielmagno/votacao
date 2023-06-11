@@ -1,5 +1,6 @@
 package br.com.dbc.votacao.controllers;
 
+import br.com.dbc.votacao.dtos.UsuarioDto;
 import br.com.dbc.votacao.services.AutenticacaoService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,8 @@ public class AutenticacaoController {
     private AutenticacaoService autenticacaoService;
 
     @PostMapping("/login")
-    public ResponseEntity<Object> login(@RequestBody String nomeDoUsuario, String senha) {
-        return autenticacaoService.login(nomeDoUsuario,senha);
+    public ResponseEntity<Object> login(@RequestBody UsuarioDto usuarioDto) {
+        return autenticacaoService.login(usuarioDto.getNomeDoUsuario(), usuarioDto.getSenha());
     }
 
 }
