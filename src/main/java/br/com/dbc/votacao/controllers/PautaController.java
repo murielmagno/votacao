@@ -33,9 +33,9 @@ public class PautaController {
 
     @GetMapping
     public ResponseEntity<Page<Pauta>> buscarTodasAsPautas(SpecificationTemplate.PautaSpec spec,
-                                                           @PageableDefault(page = 0, size = 10, sort = "fullName", direction = Sort.Direction.ASC)
+                                                           @PageableDefault(page = 0, size = 10, sort = "descricao", direction = Sort.Direction.ASC)
                                                            Pageable pageable){
         Page<Pauta> pautas = pautaService.buscarTodasAsPautas(spec, pageable);
-        return ResponseEntity.ok()
+        return ResponseEntity.status(HttpStatus.OK).body(pautas);
     }
 }
