@@ -20,7 +20,7 @@ public class AutenticacaoServiceImpl implements AutenticacaoService {
         if(usuarioService.existsUsuarioByNomeDoUsuario(nomeDoUsuario)){
             Usuario usuario = usuarioService.encontrarUsuarioPeloNomeDoUsuario(nomeDoUsuario).get();
             if(usuario.getSenha().equals(senha)){
-                return ResponseEntity.status(HttpStatus.OK).body("Usuário logado com sucesso.");
+                return ResponseEntity.status(HttpStatus.OK).body(usuario);
             } else {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Senha inválida.");
             }
