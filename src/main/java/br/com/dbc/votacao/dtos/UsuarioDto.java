@@ -6,12 +6,17 @@ import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@NoArgsConstructor
 public class UsuarioDto {
+
+    public UsuarioDto(String nomeDoUsuario) {
+    }
 
     public interface UsuarioView {
         public static interface RegistroUsuario {
@@ -39,4 +44,6 @@ public class UsuarioDto {
     @Size(min = 8, max = 20, groups = UsuarioView.AtualizacaoSenha.class)
     private String senhaAntiga;
 
+    private String mensagem;
+    private boolean isAutenticado;
 }

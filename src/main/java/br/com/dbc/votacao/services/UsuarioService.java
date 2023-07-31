@@ -21,4 +21,6 @@ public interface UsuarioService {
 
     @Transactional(rollbackFor=Exception.class)
     ResponseEntity<Object> deletarUsuario(String nomeDoUsuario);
+
+    UsuarioDto converterUsuarioParaUsuarioDto(Usuario usuario);
 }

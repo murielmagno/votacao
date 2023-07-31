@@ -1,5 +1,6 @@
 package br.com.dbc.votacao.services.impl;
 
+import br.com.dbc.votacao.dtos.UsuarioDto;
 import br.com.dbc.votacao.models.Usuario;
 import br.com.dbc.votacao.services.AutenticacaoService;
 import br.com.dbc.votacao.services.UsuarioService;
@@ -20,12 +21,20 @@ public class AutenticacaoServiceImpl implements AutenticacaoService {
         if(usuarioService.existsUsuarioByNomeDoUsuario(nomeDoUsuario)){
             Usuario usuario = usuarioService.encontrarUsuarioPeloNomeDoUsuario(nomeDoUsuario).get();
             if(usuario.getSenha().equals(senha)){
-                return ResponseEntity.status(HttpStatus.OK).body(usuario);
+                UsuarioDto usuarioDto = usuarioService.converterUsuarioParaUsuarioDto(usuario);
+                usuarioDto.setAutenticado(true);
+                return ResponseEntity.status(HttpStatus.OK).body(usuarioDto);
             } else {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("Senha inválida.");
+                UsuarioDto usuarioDto = new UsuarioDto();
+                usuarioDto.setMensagem("Senha incorreta.");
+                usuarioDto.setAutenticado(false);
+                return ResponseEntity.status(HttpStatus.OK).body(usuarioDto);
             }
         } else {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Usuário não encontrado.");
+            UsuarioDto usuarioDto = new UsuarioDto();
+            usuarioDto.setMensagem("Usuário não encontrado.");
+            usuarioDto.setAutenticado(false);
+            return ResponseEntity.status(HttpStatus.OK).body(usuarioDto);
         }
     }
 }
