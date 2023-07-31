@@ -77,4 +77,9 @@ public class UsuarioServiceImpl implements UsuarioService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
         }
     }
+
+    @Override
+    public UsuarioDto converterUsuarioParaUsuarioDto(Usuario usuario) {
+        return new UsuarioDto(usuario.getNomeDoUsuario());
+    }
 }
