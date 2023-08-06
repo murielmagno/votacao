@@ -27,15 +27,14 @@ public class PautaController {
 
     @PostMapping("/cadastrar")
     public ResponseEntity<Object> cadastrarPauta(@RequestBody @Validated(PautaDto.PautaView.RegistroPauta.class)
-                                                 @JsonView(PautaDto.PautaView.RegistroPauta.class) PautaDto pautaDto){
+                                                 @JsonView(PautaDto.PautaView.RegistroPauta.class) PautaDto pautaDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(pautaService.cadastrarPauta(pautaDto));
     }
 
     @GetMapping
-    public ResponseEntity<Page<Pauta>> buscarTodasAsPautas(SpecificationTemplate.PautaSpec spec,
-                                                           @PageableDefault(page = 0, size = 10, sort = "descricao", direction = Sort.Direction.ASC)
-                                                           Pageable pageable){
-        Page<Pauta> pautas = pautaService.buscarTodasAsPautas(spec, pageable);
+    public ResponseEntity<Page<Pauta>> buscarTodasAsPautas(@PageableDefault(page = 0, size = 10, sort = "descricao", direction = Sort.Direction.ASC)
+                                                           Pageable pageable) {
+        Page<Pauta> pautas = pautaService.buscarTodasAsPautas(pageable);
         return ResponseEntity.status(HttpStatus.OK).body(pautas);
     }
 }

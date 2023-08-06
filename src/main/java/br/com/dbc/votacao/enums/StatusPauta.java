@@ -6,7 +6,8 @@ public enum StatusPauta {
     CANCELADA(1,"Pauta cancelada"),
     EM_VOTACAO(2,"Pauta em votação"),
     ABERTA(3, "Pauta aberta"),
-    REPROVADA(4,"Pauta Reprovada");
+    REPROVADA(4,"Pauta Reprovada"),
+    ENCERRADA (5, "Pauta encerrada sem votos");
 
     private int codigo;
     private String descricao;

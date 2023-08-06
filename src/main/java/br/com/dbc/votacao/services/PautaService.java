@@ -19,5 +19,5 @@ public interface PautaService {
 
     Optional<Pauta> buscarPautaPorId(Long id);
 
-    Page<Pauta> buscarTodasAsPautas(Specification<Pauta> spec, Pageable pageable);
+    Page<Pauta> buscarTodasAsPautas(Pageable pageable);
 }
