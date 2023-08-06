@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.validator.constraints.br.CPF;
 
 import java.time.LocalDateTime;
 
@@ -22,6 +23,9 @@ public class Usuario {
 
     @Column(nullable = false, unique = true, length = 50)
     private String nomeDoUsuario;
+
+    @Column(nullable = false, unique = true, length = 11)
+    private String cpf;
 
     @Column(nullable = false)
     @JsonIgnore

@@ -5,6 +5,7 @@ import br.com.dbc.votacao.enums.TipoUsuario;
 import br.com.dbc.votacao.models.Usuario;
 import br.com.dbc.votacao.repositories.UsuarioRepository;
 import br.com.dbc.votacao.services.UsuarioService;
+import br.com.dbc.votacao.utils.CpfValidator;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,8 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Autowired
     UsuarioRepository usuarioRepository;
+    @Autowired
+    private CpfValidator cpfValidator;
 
     @Override
     public boolean existsUsuarioByNomeDoUsuario(String userName) {
@@ -29,16 +32,26 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public ResponseEntity<Object> salvarUsuario(UsuarioDto usuarioDto) {
         if (existsUsuarioByNomeDoUsuario(usuarioDto.getNomeDoUsuario())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Usuario já cadastrado.");
+            usuarioDto.setMensagem("Usuario já cadastrado.");
+            usuarioDto.setSenha(null);
+            return ResponseEntity.status(HttpStatus.OK).body(usuarioDto);
         } else {
             try {
-                var usuario = new Usuario();
-                BeanUtils.copyProperties(usuarioDto, usuario);
-                usuario.setTipoUsuario(TipoUsuario.ADMIN);
-                usuario.setDataCriacao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
-                usuario.setDataAtualizacao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
-                usuarioRepository.save(usuario);
-                return ResponseEntity.status(HttpStatus.CREATED).body("Usuário criado com sucesso.");
+                if(cpfValidator.isValid(usuarioDto.getCpf())) {
+                    var usuario = new Usuario();
+                    BeanUtils.copyProperties(usuarioDto, usuario);
+                    usuario.setTipoUsuario(TipoUsuario.ASSOC);
+                    usuario.setDataCriacao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
+                    usuario.setDataAtualizacao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
+                    usuarioDto.setMensagem("Usuário cadastrado com sucesso.");
+                    usuarioRepository.save(usuario);
+                    usuarioDto.setSenha(null);
+                    return ResponseEntity.status(HttpStatus.CREATED).body(usuarioDto);
+                } else {
+                    usuarioDto.setMensagem("CPF inválido!");
+                    usuarioDto.setSenha(null);
+                    return ResponseEntity.status(HttpStatus.OK).body(usuarioDto);
+                }
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.CONTINUE).body(e.getMessage());
             }

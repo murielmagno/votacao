@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.br.CPF;
 
 import java.util.UUID;
 
@@ -33,6 +34,11 @@ public class UsuarioDto {
     @Size(min = 3, max = 10, groups = UsuarioView.RegistroUsuario.class)
     @UsuarioConstraint
     private String nomeDoUsuario;
+
+    @NotBlank(groups = UsuarioView.RegistroUsuario.class)
+    @JsonView(UsuarioView.RegistroUsuario.class)
+    @Size(min = 11, max = 11)
+    private String cpf;
 
     @NotBlank(groups = {UsuarioView.AtualizacaoSenha.class, UsuarioView.RegistroUsuario.class})
     @JsonView({UsuarioView.AtualizacaoSenha.class, UsuarioView.RegistroUsuario.class})
