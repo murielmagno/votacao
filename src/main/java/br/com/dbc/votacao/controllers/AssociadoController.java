@@ -1,6 +1,7 @@
 package br.com.dbc.votacao.controllers;
 
 import br.com.dbc.votacao.dtos.AssociadoDto;
+import br.com.dbc.votacao.dtos.UsuarioDto;
 import br.com.dbc.votacao.services.AssociadoService;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.extern.log4j.Log4j2;
@@ -21,8 +22,8 @@ public class AssociadoController {
 
     @PostMapping("/cadastrar")
     public ResponseEntity<Object> cadastrarAssociado(@RequestBody @Validated(AssociadoDto.AssociadoView.RegistroAssociado.class)
-                                                 @JsonView(AssociadoDto.AssociadoView.RegistroAssociado.class) AssociadoDto associadoDto){
-        return ResponseEntity.status(HttpStatus.CREATED).body(associadoService.salvarAssociado(associadoDto));
+                                                 @JsonView(AssociadoDto.AssociadoView.RegistroAssociado.class) UsuarioDto usuarioDto){
+        return ResponseEntity.status(HttpStatus.CREATED).body(associadoService.salvarAssociado(usuarioDto));
     }
 
     @DeleteMapping("/{cpf}")

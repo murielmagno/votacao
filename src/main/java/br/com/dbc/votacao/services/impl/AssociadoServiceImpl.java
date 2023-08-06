@@ -1,6 +1,7 @@
 package br.com.dbc.votacao.services.impl;
 
 import br.com.dbc.votacao.dtos.AssociadoDto;
+import br.com.dbc.votacao.dtos.UsuarioDto;
 import br.com.dbc.votacao.enums.StatusAssociado;
 import br.com.dbc.votacao.models.Associado;
 import br.com.dbc.votacao.repositories.AssociadoRepository;
@@ -23,11 +24,11 @@ public class AssociadoServiceImpl implements AssociadoService {
     private CpfValidator cpfValidator;
 
     @Override
-    public ResponseEntity<Object> salvarAssociado(AssociadoDto associadoDto) {
+    public ResponseEntity<Object> salvarAssociado(UsuarioDto usuarioDto) {
         try {
             var associado = new Associado();
-            if(cpfValidator.isValid(associadoDto.getCpf())){
-                associado.setCpf(associadoDto.getCpf());
+            if(cpfValidator.isValid(usuarioDto.getCpf())){
+                associado.setCpf(usuarioDto.getCpf());
                 associado.setStatusAssociado(StatusAssociado.ATIVO);
                 associadoRepository.save(associado);
                 return ResponseEntity.status(HttpStatus.CREATED).body("Associado com CPF " + associado.getCpf() + " cadastrado com sucesso.");

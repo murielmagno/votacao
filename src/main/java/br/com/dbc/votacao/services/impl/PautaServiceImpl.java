@@ -56,8 +56,8 @@ public class PautaServiceImpl implements PautaService {
     }
 
     @Override
-    public Page<Pauta> buscarTodasAsPautas(Specification<Pauta> spec, Pageable pageable) {
-        return pautaRepository.findAll(spec,pageable);
+    public Page<Pauta> buscarTodasAsPautas(Pageable pageable) {
+        return pautaRepository.findAll(pageable);
     }
 
 

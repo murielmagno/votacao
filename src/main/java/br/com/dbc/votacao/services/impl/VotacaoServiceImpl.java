@@ -3,17 +3,20 @@ package br.com.dbc.votacao.services.impl;
 import br.com.dbc.votacao.dtos.VotacaoDto;
 import br.com.dbc.votacao.dtos.VotoDto;
 import br.com.dbc.votacao.enums.StatusAssociado;
+import br.com.dbc.votacao.enums.StatusPauta;
 import br.com.dbc.votacao.enums.StatusVotacao;
 import br.com.dbc.votacao.models.Associado;
 import br.com.dbc.votacao.models.Pauta;
 import br.com.dbc.votacao.models.Votacao;
 import br.com.dbc.votacao.models.VotacaoLog;
+import br.com.dbc.votacao.repositories.PautaRepository;
 import br.com.dbc.votacao.repositories.VotacaoRepository;
 import br.com.dbc.votacao.services.AssociadoService;
 import br.com.dbc.votacao.services.PautaService;
 import br.com.dbc.votacao.services.VotacaoLogService;
 import br.com.dbc.votacao.services.VotacaoService;
 import br.com.dbc.votacao.utils.CpfValidator;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +43,8 @@ public class VotacaoServiceImpl implements VotacaoService {
 
     @Autowired
     private AssociadoService associadoService;
+    @Autowired
+    private PautaRepository pautaRepository;
 
     @Override
     public ResponseEntity<Object> iniciarVotacao(VotacaoDto votacaoDto) {
@@ -48,7 +53,7 @@ public class VotacaoServiceImpl implements VotacaoService {
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
         if (pauta.isPresent()) {
             var votacaoExistente = votacaoRepository.findVotacaoByPauta(pauta.get());
-            if (!votacaoExistente.isPresent()) {
+            if (votacaoExistente.isEmpty()) {
                 return montarVotacao(votacaoDto, pauta, dateTimeNow);
             } else {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Votação para essa pauta já aconteceu!");
@@ -59,11 +64,12 @@ public class VotacaoServiceImpl implements VotacaoService {
     }
 
     @Override
+    @Transactional
     @Scheduled(fixedDelay = 60000)
     public void encerrarVotacaoAutomatica() {
         var log = new VotacaoLog();
         List<Votacao> votacoes = votacaoRepository.findAllByStatusVotacao(StatusVotacao.ABERTA);
-        if (!votacoes.isEmpty() && votacoes != null) {
+        if (!votacoes.isEmpty()) {
             for (Votacao votacao : votacoes) {
                 LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
                 if (votacao.getFimVotacao().isAfter(dateTimeNow)) {
@@ -73,6 +79,7 @@ public class VotacaoServiceImpl implements VotacaoService {
                     log.setDataCriacao(dateTimeNow);
                     log.setDescricao("Pauta " + votacao.getPauta().getDescricao() + " teve sua votação encerrada!");
                     votacaoLogService.salvarLog(log);
+                    atualizarStatusPauta(votacao);
                 }
             }
         }
@@ -157,4 +164,20 @@ public class VotacaoServiceImpl implements VotacaoService {
         return ResponseEntity.status(HttpStatus.OK).body("Voto realizado com sucesso.");
     }
 
+    private void atualizarStatusPauta(Votacao votacao) {
+        Optional<Pauta> pauta = pautaService.buscarPautaPorId(votacao.getPauta().getId());
+        if (pauta.isPresent()) {
+            if (votacao.getTotalDeVotos() == 0) {
+                pauta.get().setStatusPauta(StatusPauta.ENCERRADA);
+            }else {
+                int maioriaVotos = (votacao.getTotalDeVotos() / 2);
+                if (votacao.getVotosFavoraveis() > maioriaVotos) {
+                    pauta.get().setStatusPauta(StatusPauta.APROVADA);
+                }else {
+                    pauta.get().setStatusPauta(StatusPauta.REPROVADA);
+                }
+            }
+        }
+        pautaRepository.saveAndFlush(pauta.get());
+    }
 }

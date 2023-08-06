@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface AssociadoService {
 
     @Transactional(rollbackFor=Exception.class)
-    ResponseEntity<Object> salvarAssociado(AssociadoDto associadoDto);
+    ResponseEntity<Object> salvarAssociado(UsuarioDto usuarioDto);
 
     @Transactional(rollbackFor=Exception.class)
     ResponseEntity<Object> deletarAssociado(String cpf);
