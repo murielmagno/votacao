@@ -18,6 +18,8 @@ import br.com.dbc.votacao.services.VotacaoService;
 import br.com.dbc.votacao.utils.CpfValidator;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -169,15 +171,21 @@ public class VotacaoServiceImpl implements VotacaoService {
         if (pauta.isPresent()) {
             if (votacao.getTotalDeVotos() == 0) {
                 pauta.get().setStatusPauta(StatusPauta.ENCERRADA);
-            }else {
+            } else {
                 int maioriaVotos = (votacao.getTotalDeVotos() / 2);
                 if (votacao.getVotosFavoraveis() > maioriaVotos) {
                     pauta.get().setStatusPauta(StatusPauta.APROVADA);
-                }else {
+                } else {
                     pauta.get().setStatusPauta(StatusPauta.REPROVADA);
                 }
             }
         }
         pautaRepository.saveAndFlush(pauta.get());
     }
+
+    @Override
+    public Page<Votacao> buscarTodasAsVotacoes(Pageable pageable) {
+        return votacaoRepository.findAll(pageable);
+    }
+
 }
