@@ -17,7 +17,9 @@ public interface PautaService {
     @Transactional
     ResponseEntity<Object> deletarPauta(Long id);
 
+    @Transactional(readOnly = true)
     Optional<Pauta> buscarPautaPorId(Long id);
 
+    @Transactional(readOnly = true)
     Page<Pauta> buscarTodasAsPautas(Pageable pageable);
 }
