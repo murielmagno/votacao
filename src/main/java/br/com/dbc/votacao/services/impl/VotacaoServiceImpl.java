@@ -74,7 +74,7 @@ public class VotacaoServiceImpl implements VotacaoService {
         if (!votacoes.isEmpty()) {
             for (Votacao votacao : votacoes) {
                 LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
-                if (votacao.getFimVotacao().isAfter(dateTimeNow)) {
+                if (dateTimeNow.isAfter(votacao.getFimVotacao())) {
                     votacao.setStatusVotacao(StatusVotacao.ENCERRADA);
                     votacao.setTotalDeVotos(votacao.getVotosFavoraveis() + votacao.getVotosContra());
                     votacaoRepository.save(votacao);
