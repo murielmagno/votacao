@@ -88,11 +88,11 @@ public class VotacaoServiceImpl implements VotacaoService {
     }
 
     @Override
-    public ResponseEntity<Object> votar(String cpf, VotoDto voto) {
+    public ResponseEntity<Object> votar(VotoDto voto) {
         var log = new VotacaoLog();
         var cpfValidator = new CpfValidator();
-        if (cpfValidator.isValid(cpf)) {
-            Optional<Associado> associado = associadoService.buscarAssociadoPeloCpf(cpf);
+        if (cpfValidator.isValid(voto.getCpf())) {
+            Optional<Associado> associado = associadoService.buscarAssociadoPeloCpf(voto.getCpf());
             if (associado.isPresent()) {
                 if (associado.get().getStatusAssociado() == StatusAssociado.ATIVO) {
                     Optional<Votacao> votacao = votacaoRepository.findById(voto.getVotacao());

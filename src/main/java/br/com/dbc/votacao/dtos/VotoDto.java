@@ -8,5 +8,6 @@ import lombok.Data;
 public class VotoDto {
 
     private Long votacao;
+    private String cpf;
     private String voto;
 }

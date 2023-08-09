@@ -19,7 +19,7 @@ public interface VotacaoService {
     void encerrarVotacaoAutomatica();
 
     @Transactional(rollbackFor=Exception.class)
-    ResponseEntity<Object> votar(String cpf, VotoDto voto);
+    ResponseEntity<Object> votar(VotoDto voto);
 
     @Transactional(readOnly = true)
     Page<Votacao> buscarTodasAsVotacoes(Pageable pageable);

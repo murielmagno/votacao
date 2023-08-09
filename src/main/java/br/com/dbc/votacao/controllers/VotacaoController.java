@@ -30,9 +30,9 @@ public class VotacaoController {
         return votacaoService.iniciarVotacao(votacaoDto);
     }
 
-    @PostMapping("/votar/{cpf}")
-    public ResponseEntity<Object> votar(@PathVariable(value = "cpf") String cpf, @RequestBody VotoDto voto) {
-        return votacaoService.votar(cpf, voto);
+    @PostMapping("/votar")
+    public ResponseEntity<Object> votar(@RequestBody VotoDto voto) {
+        return votacaoService.votar(voto);
     }
 
     @GetMapping
