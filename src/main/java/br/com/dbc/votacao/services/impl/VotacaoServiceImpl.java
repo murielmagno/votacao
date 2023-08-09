@@ -104,16 +104,16 @@ public class VotacaoServiceImpl implements VotacaoService {
                         } else if (voto.getVoto().equalsIgnoreCase("não")) {
                             return setarVotoContra(log, associado, votacao, associadosQueVotaram);
                         } else {
-                            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Voto invalído, utilize SIM ou NÃO para votar.");
+                            return ResponseEntity.status(HttpStatus.OK).body("Voto invalído, utilize SIM ou NÃO para votar.");
                         }
                     } else {
-                        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Votação encerrado ou não encontrada.");
+                        return ResponseEntity.status(HttpStatus.OK).body("Votação encerrado ou não encontrada.");
                     }
                 } else {
-                    return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Associado inapto para votar");
+                    return ResponseEntity.status(HttpStatus.OK).body("Associado inapto para votar");
                 }
             } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Associado não encontrado para votar");
+                return ResponseEntity.status(HttpStatus.OK).body("Associado não encontrado para votar");
             }
         } else {
             return ResponseEntity.status(HttpStatus.OK).body("Inapto a votar");
@@ -139,7 +139,7 @@ public class VotacaoServiceImpl implements VotacaoService {
         log.setDescricao("Pauta " + pauta.get().getDescricao() + " teve sua votação iniciada!");
         log.setDataCriacao(dateTimeNow);
         votacaoLogService.salvarLog(log);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Votação Iniciada!");
+        return ResponseEntity.status(HttpStatus.OK).body("Votação Iniciada!");
     }
 
     private ResponseEntity<Object> setarVotoFavoravel(VotacaoLog log, Optional<Associado> associado, Optional<Votacao> votacao, ArrayList<Associado> associadosQueVotaram) {
