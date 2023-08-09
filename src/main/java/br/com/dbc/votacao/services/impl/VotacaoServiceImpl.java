@@ -188,4 +188,10 @@ public class VotacaoServiceImpl implements VotacaoService {
         return votacaoRepository.findAll(pageable);
     }
 
+    @Override
+    public Votacao findById(Long id) {
+       Optional<Votacao> votacao = votacaoRepository.findById(id);
+        return votacao.orElseGet(Votacao::new);
+    }
+
 }

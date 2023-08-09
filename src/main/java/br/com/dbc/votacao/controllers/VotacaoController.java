@@ -40,4 +40,10 @@ public class VotacaoController {
         Page<Votacao> votacoes = votacaoService.buscarTodasAsVotacoes(pageable);
         return ResponseEntity.status(HttpStatus.OK).body(votacoes);
     }
+
+    @GetMapping
+    public ResponseEntity<Votacao> buscarVotacao(@PathVariable(value = "id") Long id) {
+        Votacao votacao = votacaoService.findById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(votacao);
+    }
 }
