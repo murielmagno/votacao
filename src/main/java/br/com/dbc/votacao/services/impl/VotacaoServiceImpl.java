@@ -1,5 +1,6 @@
 package br.com.dbc.votacao.services.impl;
 
+import br.com.dbc.votacao.dtos.MensagensDto;
 import br.com.dbc.votacao.dtos.VotacaoDto;
 import br.com.dbc.votacao.dtos.VotoDto;
 import br.com.dbc.votacao.enums.StatusAssociado;
@@ -89,6 +90,7 @@ public class VotacaoServiceImpl implements VotacaoService {
 
     @Override
     public ResponseEntity<Object> votar(VotoDto voto) {
+        var mensagem = new MensagensDto();
         var log = new VotacaoLog();
         var cpfValidator = new CpfValidator();
         if (cpfValidator.isValid(voto.getCpf())) {
@@ -104,23 +106,29 @@ public class VotacaoServiceImpl implements VotacaoService {
                         } else if (voto.getVoto().equalsIgnoreCase("não")) {
                             return setarVotoContra(log, associado, votacao, associadosQueVotaram);
                         } else {
-                            return ResponseEntity.status(HttpStatus.OK).body("Voto invalído, utilize SIM ou NÃO para votar.");
+                            mensagem.setMensagem("Voto invalído, utilize SIM ou NÃO para votar.");
+                            return ResponseEntity.status(HttpStatus.OK).body(mensagem);
                         }
                     } else {
-                        return ResponseEntity.status(HttpStatus.OK).body("Votação encerrado ou não encontrada.");
+                        mensagem.setMensagem("Votação encerrado ou você já votou.");
+                        return ResponseEntity.status(HttpStatus.OK).body(mensagem);
                     }
                 } else {
-                    return ResponseEntity.status(HttpStatus.OK).body("Associado inapto para votar");
+                    mensagem.setMensagem("Associado inapto para votar");
+                    return ResponseEntity.status(HttpStatus.OK).body(mensagem);
                 }
             } else {
-                return ResponseEntity.status(HttpStatus.OK).body("Associado não encontrado para votar");
+                mensagem.setMensagem("Associado não encontrado para votar");
+                return ResponseEntity.status(HttpStatus.OK).body(mensagem);
             }
         } else {
-            return ResponseEntity.status(HttpStatus.OK).body("Inapto a votar");
+            mensagem.setMensagem("Inapto a votar");
+            return ResponseEntity.status(HttpStatus.OK).body(mensagem);
         }
     }
 
     private ResponseEntity<Object> montarVotacao(VotacaoDto votacaoDto, Optional<Pauta> pauta, LocalDateTime dateTimeNow) {
+        var mensagem = new MensagensDto();
         var votacao = new Votacao();
         votacao.setPauta(pauta.get());
         votacao.setInicioVotacao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
@@ -139,10 +147,12 @@ public class VotacaoServiceImpl implements VotacaoService {
         log.setDescricao("Pauta " + pauta.get().getDescricao() + " teve sua votação iniciada!");
         log.setDataCriacao(dateTimeNow);
         votacaoLogService.salvarLog(log);
-        return ResponseEntity.status(HttpStatus.OK).body("Votação Iniciada!");
+        mensagem.setMensagem("Votação Iniciada!");
+        return ResponseEntity.status(HttpStatus.OK).body(mensagem);
     }
 
     private ResponseEntity<Object> setarVotoFavoravel(VotacaoLog log, Optional<Associado> associado, Optional<Votacao> votacao, ArrayList<Associado> associadosQueVotaram) {
+        var mensagem = new MensagensDto();
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
         associadosQueVotaram.add(associado.get());
         votacao.get().setListaDeVotantes(associadosQueVotaram);
@@ -151,10 +161,12 @@ public class VotacaoServiceImpl implements VotacaoService {
         log.setDescricao("Voto do associado " + associado.get().getCpf() + " computado com sucesso!");
         votacaoLogService.salvarLog(log);
         votacaoRepository.saveAndFlush(votacao.get());
-        return ResponseEntity.status(HttpStatus.OK).body("Voto realizado com sucesso.");
+        mensagem.setMensagem("Voto realizado com sucesso.");
+        return ResponseEntity.status(HttpStatus.OK).body(mensagem);
     }
 
     private ResponseEntity<Object> setarVotoContra(VotacaoLog log, Optional<Associado> associado, Optional<Votacao> votacao, ArrayList<Associado> associadosQueVotaram) {
+        var mensagem = new MensagensDto();
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
         associadosQueVotaram.add(associado.get());
         votacao.get().setListaDeVotantes(associadosQueVotaram);
@@ -163,7 +175,8 @@ public class VotacaoServiceImpl implements VotacaoService {
         log.setDescricao("Voto do associado " + associado.get().getCpf() + " computado com sucesso!");
         votacaoLogService.salvarLog(log);
         votacaoRepository.saveAndFlush(votacao.get());
-        return ResponseEntity.status(HttpStatus.OK).body("Voto realizado com sucesso.");
+        mensagem.setMensagem("Voto realizado com sucesso.");
+        return ResponseEntity.status(HttpStatus.OK).body(mensagem);
     }
 
     private void atualizarStatusPauta(Votacao votacao) {

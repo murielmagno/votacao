@@ -23,6 +23,8 @@ public class AutenticacaoServiceImpl implements AutenticacaoService {
             if(usuario.getSenha().equals(senha)){
                 UsuarioDto usuarioDto = usuarioService.converterUsuarioParaUsuarioDto(usuario);
                 usuarioDto.setAutenticado(true);
+                usuarioDto.setCpf(usuario.getCpf());
+                usuarioDto.setNomeDoUsuario(usuario.getNomeDoUsuario());
                 return ResponseEntity.status(HttpStatus.OK).body(usuarioDto);
             } else {
                 UsuarioDto usuarioDto = new UsuarioDto();

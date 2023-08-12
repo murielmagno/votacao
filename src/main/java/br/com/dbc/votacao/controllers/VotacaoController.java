@@ -41,7 +41,7 @@ public class VotacaoController {
         return ResponseEntity.status(HttpStatus.OK).body(votacoes);
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public ResponseEntity<Votacao> buscarVotacao(@PathVariable(value = "id") Long id) {
         Votacao votacao = votacaoService.findById(id);
         return ResponseEntity.status(HttpStatus.OK).body(votacao);
