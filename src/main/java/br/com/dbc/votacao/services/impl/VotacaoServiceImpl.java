@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -100,11 +99,11 @@ public class VotacaoServiceImpl implements VotacaoService {
                     Optional<Votacao> votacao = votacaoRepository.findById(voto.getVotacao());
                     if (votacao.isPresent() && votacao.get().getStatusVotacao().equals(StatusVotacao.ABERTA)
                             && !votacao.get().getListaDeVotantes().contains(associado.get())) {
-                        var associadosQueVotaram = new ArrayList<Associado>();
+                        var associadosQueVotaram = votacao.get().getListaDeVotantes();
                         if (voto.getVoto().equalsIgnoreCase("sim")) {
-                            return setarVotoFavoravel(log, associado, votacao, associadosQueVotaram);
+                            return setarVotoFavoravel(log, associado.get(), votacao.get(), associadosQueVotaram);
                         } else if (voto.getVoto().equalsIgnoreCase("não")) {
-                            return setarVotoContra(log, associado, votacao, associadosQueVotaram);
+                            return setarVotoContra(log, associado.get(), votacao.get(), associadosQueVotaram);
                         } else {
                             mensagem.setMensagem("Voto invalído, utilize SIM ou NÃO para votar.");
                             return ResponseEntity.status(HttpStatus.OK).body(mensagem);
@@ -151,30 +150,32 @@ public class VotacaoServiceImpl implements VotacaoService {
         return ResponseEntity.status(HttpStatus.OK).body(mensagem);
     }
 
-    private ResponseEntity<Object> setarVotoFavoravel(VotacaoLog log, Optional<Associado> associado, Optional<Votacao> votacao, ArrayList<Associado> associadosQueVotaram) {
+    private ResponseEntity<Object> setarVotoFavoravel(VotacaoLog log, Associado associado, Votacao votacao, List<Associado> associadosQueVotaram) {
         var mensagem = new MensagensDto();
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
-        associadosQueVotaram.add(associado.get());
-        votacao.get().setListaDeVotantes(associadosQueVotaram);
-        votacao.get().setVotosFavoraveis(votacao.get().getVotosFavoraveis() + 1);
+        associadosQueVotaram.add(associado);
+        votacao.setListaDeVotantes(associadosQueVotaram);
+        votacao.setVotosFavoraveis(votacao.getVotosFavoraveis() + 1);
+        votacao.setTotalDeVotos(votacao.getTotalDeVotos() + 1);
         log.setDataCriacao(dateTimeNow);
-        log.setDescricao("Voto do associado " + associado.get().getCpf() + " computado com sucesso!");
+        log.setDescricao("Voto do associado " + associado.getCpf() + " computado com sucesso!");
         votacaoLogService.salvarLog(log);
-        votacaoRepository.saveAndFlush(votacao.get());
+        votacaoRepository.saveAndFlush(votacao);
         mensagem.setMensagem("Voto realizado com sucesso.");
         return ResponseEntity.status(HttpStatus.OK).body(mensagem);
     }
 
-    private ResponseEntity<Object> setarVotoContra(VotacaoLog log, Optional<Associado> associado, Optional<Votacao> votacao, ArrayList<Associado> associadosQueVotaram) {
+    private ResponseEntity<Object> setarVotoContra(VotacaoLog log, Associado associado, Votacao votacao, List<Associado> associadosQueVotaram) {
         var mensagem = new MensagensDto();
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
-        associadosQueVotaram.add(associado.get());
-        votacao.get().setListaDeVotantes(associadosQueVotaram);
-        votacao.get().setVotosContra(votacao.get().getVotosContra() + 1);
+        associadosQueVotaram.add(associado);
+        votacao.setListaDeVotantes(associadosQueVotaram);
+        votacao.setVotosContra(votacao.getVotosContra() + 1);
+        votacao.setTotalDeVotos(votacao.getTotalDeVotos() + 1);
         log.setDataCriacao(dateTimeNow);
-        log.setDescricao("Voto do associado " + associado.get().getCpf() + " computado com sucesso!");
+        log.setDescricao("Voto do associado " + associado.getCpf() + " computado com sucesso!");
         votacaoLogService.salvarLog(log);
-        votacaoRepository.saveAndFlush(votacao.get());
+        votacaoRepository.saveAndFlush(votacao);
         mensagem.setMensagem("Voto realizado com sucesso.");
         return ResponseEntity.status(HttpStatus.OK).body(mensagem);
     }
@@ -192,8 +193,8 @@ public class VotacaoServiceImpl implements VotacaoService {
                     pauta.get().setStatusPauta(StatusPauta.REPROVADA);
                 }
             }
+            pautaRepository.saveAndFlush(pauta.get());
         }
-        pautaRepository.saveAndFlush(pauta.get());
     }
 
     @Override
