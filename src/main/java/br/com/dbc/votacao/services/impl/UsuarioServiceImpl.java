@@ -1,9 +1,12 @@
 package br.com.dbc.votacao.services.impl;
 
 import br.com.dbc.votacao.dtos.UsuarioDto;
+import br.com.dbc.votacao.enums.StatusAssociado;
 import br.com.dbc.votacao.enums.TipoUsuario;
+import br.com.dbc.votacao.models.Associado;
 import br.com.dbc.votacao.models.Usuario;
 import br.com.dbc.votacao.repositories.UsuarioRepository;
+import br.com.dbc.votacao.services.AssociadoService;
 import br.com.dbc.votacao.services.UsuarioService;
 import br.com.dbc.votacao.utils.CpfValidator;
 import org.springframework.beans.BeanUtils;
@@ -23,6 +26,8 @@ public class UsuarioServiceImpl implements UsuarioService {
     UsuarioRepository usuarioRepository;
     @Autowired
     private CpfValidator cpfValidator;
+    @Autowired
+    AssociadoService associadoService;
 
     @Override
     public boolean existsUsuarioByNomeDoUsuario(String userName) {
@@ -46,6 +51,7 @@ public class UsuarioServiceImpl implements UsuarioService {
                     usuarioDto.setMensagem("Usuário cadastrado com sucesso.");
                     usuarioRepository.save(usuario);
                     usuarioDto.setSenha(null);
+                    criarAssociado(usuarioDto);
                     return ResponseEntity.status(HttpStatus.CREATED).body(usuarioDto);
                 } else {
                     usuarioDto.setMensagem("CPF inválido!");
@@ -56,6 +62,10 @@ public class UsuarioServiceImpl implements UsuarioService {
                 return ResponseEntity.status(HttpStatus.CONTINUE).body(e.getMessage());
             }
         }
+    }
+
+    private void criarAssociado(UsuarioDto usuarioDto) {
+        associadoService.salvarAssociado(usuarioDto);
     }
 
     @Override
@@ -85,6 +95,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     public ResponseEntity<Object> deletarUsuario(String nomeDoUsuario) {
         if (existsUsuarioByNomeDoUsuario(nomeDoUsuario)) {
             usuarioRepository.deleteById(encontrarUsuarioPeloNomeDoUsuario(nomeDoUsuario).get().getId());
+            associadoService.deletarAssociado(encontrarUsuarioPeloNomeDoUsuario(nomeDoUsuario).get().getCpf());
             return ResponseEntity.status(HttpStatus.OK).body("Usuario deletado");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");

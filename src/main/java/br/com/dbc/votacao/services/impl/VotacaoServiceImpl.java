@@ -1,5 +1,6 @@
 package br.com.dbc.votacao.services.impl;
 
+import br.com.dbc.votacao.dtos.MensagensDto;
 import br.com.dbc.votacao.dtos.VotacaoDto;
 import br.com.dbc.votacao.dtos.VotoDto;
 import br.com.dbc.votacao.enums.StatusAssociado;
@@ -27,7 +28,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,39 +88,46 @@ public class VotacaoServiceImpl implements VotacaoService {
     }
 
     @Override
-    public ResponseEntity<Object> votar(String cpf, VotoDto voto) {
+    public ResponseEntity<Object> votar(VotoDto voto) {
+        var mensagem = new MensagensDto();
         var log = new VotacaoLog();
         var cpfValidator = new CpfValidator();
-        if (cpfValidator.isValid(cpf)) {
-            Optional<Associado> associado = associadoService.buscarAssociadoPeloCpf(cpf);
+        if (cpfValidator.isValid(voto.getCpf())) {
+            Optional<Associado> associado = associadoService.buscarAssociadoPeloCpf(voto.getCpf());
             if (associado.isPresent()) {
                 if (associado.get().getStatusAssociado() == StatusAssociado.ATIVO) {
                     Optional<Votacao> votacao = votacaoRepository.findById(voto.getVotacao());
                     if (votacao.isPresent() && votacao.get().getStatusVotacao().equals(StatusVotacao.ABERTA)
                             && !votacao.get().getListaDeVotantes().contains(associado.get())) {
-                        var associadosQueVotaram = new ArrayList<Associado>();
+                        var associadosQueVotaram = votacao.get().getListaDeVotantes();
                         if (voto.getVoto().equalsIgnoreCase("sim")) {
-                            return setarVotoFavoravel(log, associado, votacao, associadosQueVotaram);
+                            return setarVotoFavoravel(log, associado.get(), votacao.get(), associadosQueVotaram);
                         } else if (voto.getVoto().equalsIgnoreCase("não")) {
-                            return setarVotoContra(log, associado, votacao, associadosQueVotaram);
+                            return setarVotoContra(log, associado.get(), votacao.get(), associadosQueVotaram);
                         } else {
-                            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Voto invalído, utilize SIM ou NÃO para votar.");
+                            mensagem.setMensagem("Voto invalído, utilize SIM ou NÃO para votar.");
+                            return ResponseEntity.status(HttpStatus.OK).body(mensagem);
                         }
                     } else {
-                        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Votação encerrado ou não encontrada.");
+                        mensagem.setMensagem("Votação encerrado ou você já votou.");
+                        return ResponseEntity.status(HttpStatus.OK).body(mensagem);
                     }
                 } else {
-                    return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Associado inapto para votar");
+                    mensagem.setMensagem("Associado inapto para votar");
+                    return ResponseEntity.status(HttpStatus.OK).body(mensagem);
                 }
             } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Associado não encontrado para votar");
+                mensagem.setMensagem("Associado não encontrado para votar");
+                return ResponseEntity.status(HttpStatus.OK).body(mensagem);
             }
         } else {
-            return ResponseEntity.status(HttpStatus.OK).body("Inapto a votar");
+            mensagem.setMensagem("Inapto a votar");
+            return ResponseEntity.status(HttpStatus.OK).body(mensagem);
         }
     }
 
     private ResponseEntity<Object> montarVotacao(VotacaoDto votacaoDto, Optional<Pauta> pauta, LocalDateTime dateTimeNow) {
+        var mensagem = new MensagensDto();
         var votacao = new Votacao();
         votacao.setPauta(pauta.get());
         votacao.setInicioVotacao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
@@ -139,31 +146,38 @@ public class VotacaoServiceImpl implements VotacaoService {
         log.setDescricao("Pauta " + pauta.get().getDescricao() + " teve sua votação iniciada!");
         log.setDataCriacao(dateTimeNow);
         votacaoLogService.salvarLog(log);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Votação Iniciada!");
+        mensagem.setMensagem("Votação Iniciada!");
+        return ResponseEntity.status(HttpStatus.OK).body(mensagem);
     }
 
-    private ResponseEntity<Object> setarVotoFavoravel(VotacaoLog log, Optional<Associado> associado, Optional<Votacao> votacao, ArrayList<Associado> associadosQueVotaram) {
+    private ResponseEntity<Object> setarVotoFavoravel(VotacaoLog log, Associado associado, Votacao votacao, List<Associado> associadosQueVotaram) {
+        var mensagem = new MensagensDto();
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
-        associadosQueVotaram.add(associado.get());
-        votacao.get().setListaDeVotantes(associadosQueVotaram);
-        votacao.get().setVotosFavoraveis(votacao.get().getVotosFavoraveis() + 1);
+        associadosQueVotaram.add(associado);
+        votacao.setListaDeVotantes(associadosQueVotaram);
+        votacao.setVotosFavoraveis(votacao.getVotosFavoraveis() + 1);
+        votacao.setTotalDeVotos(votacao.getTotalDeVotos() + 1);
         log.setDataCriacao(dateTimeNow);
-        log.setDescricao("Voto do associado " + associado.get().getCpf() + " computado com sucesso!");
+        log.setDescricao("Voto do associado " + associado.getCpf() + " computado com sucesso!");
         votacaoLogService.salvarLog(log);
-        votacaoRepository.saveAndFlush(votacao.get());
-        return ResponseEntity.status(HttpStatus.OK).body("Voto realizado com sucesso.");
+        votacaoRepository.saveAndFlush(votacao);
+        mensagem.setMensagem("Voto realizado com sucesso.");
+        return ResponseEntity.status(HttpStatus.OK).body(mensagem);
     }
 
-    private ResponseEntity<Object> setarVotoContra(VotacaoLog log, Optional<Associado> associado, Optional<Votacao> votacao, ArrayList<Associado> associadosQueVotaram) {
+    private ResponseEntity<Object> setarVotoContra(VotacaoLog log, Associado associado, Votacao votacao, List<Associado> associadosQueVotaram) {
+        var mensagem = new MensagensDto();
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
-        associadosQueVotaram.add(associado.get());
-        votacao.get().setListaDeVotantes(associadosQueVotaram);
-        votacao.get().setVotosContra(votacao.get().getVotosContra() + 1);
+        associadosQueVotaram.add(associado);
+        votacao.setListaDeVotantes(associadosQueVotaram);
+        votacao.setVotosContra(votacao.getVotosContra() + 1);
+        votacao.setTotalDeVotos(votacao.getTotalDeVotos() + 1);
         log.setDataCriacao(dateTimeNow);
-        log.setDescricao("Voto do associado " + associado.get().getCpf() + " computado com sucesso!");
+        log.setDescricao("Voto do associado " + associado.getCpf() + " computado com sucesso!");
         votacaoLogService.salvarLog(log);
-        votacaoRepository.saveAndFlush(votacao.get());
-        return ResponseEntity.status(HttpStatus.OK).body("Voto realizado com sucesso.");
+        votacaoRepository.saveAndFlush(votacao);
+        mensagem.setMensagem("Voto realizado com sucesso.");
+        return ResponseEntity.status(HttpStatus.OK).body(mensagem);
     }
 
     private void atualizarStatusPauta(Votacao votacao) {
@@ -179,13 +193,19 @@ public class VotacaoServiceImpl implements VotacaoService {
                     pauta.get().setStatusPauta(StatusPauta.REPROVADA);
                 }
             }
+            pautaRepository.saveAndFlush(pauta.get());
         }
-        pautaRepository.saveAndFlush(pauta.get());
     }
 
     @Override
     public Page<Votacao> buscarTodasAsVotacoes(Pageable pageable) {
         return votacaoRepository.findAll(pageable);
+    }
+
+    @Override
+    public Votacao findById(Long id) {
+       Optional<Votacao> votacao = votacaoRepository.findById(id);
+        return votacao.orElseGet(Votacao::new);
     }
 
 }

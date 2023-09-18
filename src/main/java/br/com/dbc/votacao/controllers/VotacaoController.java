@@ -30,14 +30,20 @@ public class VotacaoController {
         return votacaoService.iniciarVotacao(votacaoDto);
     }
 
-    @PostMapping("/votar/{cpf}")
-    public ResponseEntity<Object> votar(@PathVariable(value = "cpf") String cpf, @RequestBody VotoDto voto) {
-        return votacaoService.votar(cpf, voto);
+    @PostMapping("/votar")
+    public ResponseEntity<Object> votar(@RequestBody VotoDto voto) {
+        return votacaoService.votar(voto);
     }
 
     @GetMapping
     public ResponseEntity<Page<Votacao>> buscarTodasAsPautas(@PageableDefault(page = 0, size = 10, sort = "pauta", direction = Sort.Direction.ASC) Pageable pageable) {
         Page<Votacao> votacoes = votacaoService.buscarTodasAsVotacoes(pageable);
         return ResponseEntity.status(HttpStatus.OK).body(votacoes);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Votacao> buscarVotacao(@PathVariable(value = "id") Long id) {
+        Votacao votacao = votacaoService.findById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(votacao);
     }
 }
