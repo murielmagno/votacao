@@ -22,6 +22,7 @@ import java.util.Optional;
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
+    public static final String AMERICA_SAO_PAULO = "America/Sao_Paulo";
     @Autowired
     UsuarioRepository usuarioRepository;
     @Autowired
@@ -30,13 +31,13 @@ public class UsuarioServiceImpl implements UsuarioService {
     AssociadoService associadoService;
 
     @Override
-    public boolean existsUsuarioByNomeDoUsuario(String userName) {
-        return usuarioRepository.existsUsuarioByNomeDoUsuario(userName);
+    public boolean existsUsuarioByEmail(String email) {
+        return usuarioRepository.existsUsuarioByEmail(email);
     }
 
     @Override
     public ResponseEntity<Object> salvarUsuario(UsuarioDto usuarioDto) {
-        if (existsUsuarioByNomeDoUsuario(usuarioDto.getNomeDoUsuario())) {
+        if (existsUsuarioByEmail(usuarioDto.getEmail())) {
             usuarioDto.setMensagem("Usuario já cadastrado.");
             usuarioDto.setSenha(null);
             return ResponseEntity.status(HttpStatus.OK).body(usuarioDto);
@@ -46,8 +47,8 @@ public class UsuarioServiceImpl implements UsuarioService {
                     var usuario = new Usuario();
                     BeanUtils.copyProperties(usuarioDto, usuario);
                     usuario.setTipoUsuario(TipoUsuario.ASSOC);
-                    usuario.setDataCriacao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
-                    usuario.setDataAtualizacao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
+                    usuario.setDataCriacao(LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO)));
+                    usuario.setDataAtualizacao(LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO)));
                     usuarioDto.setMensagem("Usuário cadastrado com sucesso.");
                     usuarioRepository.save(usuario);
                     usuarioDto.setSenha(null);
@@ -69,15 +70,15 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public Optional<Usuario> encontrarUsuarioPeloNomeDoUsuario(String nomeDoUsuario) {
-        return usuarioRepository.findUsuarioByNomeDoUsuario(nomeDoUsuario);
+    public Optional<Usuario> findUsuarioByEmail(String email) {
+        return usuarioRepository.findUsuarioByEmail(email);
     }
 
     @Override
     public ResponseEntity<Object> alterarSenha(String nomeDoUsuario, UsuarioDto usuarioDto) {
         MensagensDto mensagensDto = new MensagensDto();
-        if (existsUsuarioByNomeDoUsuario(nomeDoUsuario)) {
-            Optional<Usuario> usuario = encontrarUsuarioPeloNomeDoUsuario(nomeDoUsuario);
+        if (existsUsuarioByEmail(nomeDoUsuario)) {
+            Optional<Usuario> usuario = findUsuarioByEmail(nomeDoUsuario);
             if (usuario.get().getSenha().equals(usuarioDto.getSenhaAntiga())) {
                 usuario.get().setSenha(usuarioDto.getSenha());
                 usuario.get().setDataAtualizacao(LocalDateTime.now(ZoneId.of("UTC")));
@@ -98,8 +99,8 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public ResponseEntity<Object> deletarUsuario(String nomeDoUsuario) {
         MensagensDto mensagensDto = new MensagensDto();
-        if (existsUsuarioByNomeDoUsuario(nomeDoUsuario)) {
-            Optional<Usuario> usuario = encontrarUsuarioPeloNomeDoUsuario(nomeDoUsuario);
+        if (existsUsuarioByEmail(nomeDoUsuario)) {
+            Optional<Usuario> usuario = findUsuarioByEmail(nomeDoUsuario);
             if (usuario.isPresent()) {
                 associadoService.deletarAssociado(usuario.get().getCpf());
                 usuarioRepository.deleteById(usuario.get().getId());

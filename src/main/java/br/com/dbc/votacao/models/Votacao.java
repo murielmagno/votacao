@@ -19,7 +19,7 @@ public class Votacao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long Id;
+    private Long id;
 
     @OneToOne
     private Pauta pauta;

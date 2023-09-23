@@ -9,12 +9,12 @@ import java.util.Optional;
 
 public interface UsuarioService {
 
-    boolean existsUsuarioByNomeDoUsuario(String nomeDoUsuario);
+    boolean existsUsuarioByEmail(String nomeDoUsuario);
 
     @Transactional(rollbackFor=Exception.class)
     ResponseEntity<Object> salvarUsuario(UsuarioDto usuarioDto);
 
-    Optional<Usuario> encontrarUsuarioPeloNomeDoUsuario(String nomeDoUsuario);
+    Optional<Usuario> findUsuarioByEmail(String nomeDoUsuario);
 
     @Transactional(rollbackFor=Exception.class)
     ResponseEntity<Object> alterarSenha(String nomeDoUsuario, UsuarioDto usuarioDto);
