@@ -1,14 +1,14 @@
 package br.com.dbc.votacao.services.impl;
 
+import br.com.dbc.votacao.dtos.MensagensDto;
 import br.com.dbc.votacao.dtos.UsuarioDto;
-import br.com.dbc.votacao.enums.StatusAssociado;
 import br.com.dbc.votacao.enums.TipoUsuario;
-import br.com.dbc.votacao.models.Associado;
 import br.com.dbc.votacao.models.Usuario;
 import br.com.dbc.votacao.repositories.UsuarioRepository;
 import br.com.dbc.votacao.services.AssociadoService;
 import br.com.dbc.votacao.services.UsuarioService;
 import br.com.dbc.votacao.utils.CpfValidator;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -42,7 +42,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             return ResponseEntity.status(HttpStatus.OK).body(usuarioDto);
         } else {
             try {
-                if(cpfValidator.isValid(usuarioDto.getCpf())) {
+                if (cpfValidator.isValid(usuarioDto.getCpf())) {
                     var usuario = new Usuario();
                     BeanUtils.copyProperties(usuarioDto, usuario);
                     usuario.setTipoUsuario(TipoUsuario.ASSOC);
@@ -75,31 +75,43 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public ResponseEntity<Object> alterarSenha(String nomeDoUsuario, UsuarioDto usuarioDto) {
-
+        MensagensDto mensagensDto = new MensagensDto();
         if (existsUsuarioByNomeDoUsuario(nomeDoUsuario)) {
             Optional<Usuario> usuario = encontrarUsuarioPeloNomeDoUsuario(nomeDoUsuario);
             if (usuario.get().getSenha().equals(usuarioDto.getSenhaAntiga())) {
                 usuario.get().setSenha(usuarioDto.getSenha());
                 usuario.get().setDataAtualizacao(LocalDateTime.now(ZoneId.of("UTC")));
                 usuarioRepository.save(usuario.get());
-                return ResponseEntity.status(HttpStatus.OK).body("Senha alterada.");
+                mensagensDto.setMensagem("Senha alterada.");
+                return ResponseEntity.status(HttpStatus.OK).body(mensagensDto);
             } else {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("Senha errada!.");
+                mensagensDto.setMensagem("Senha errada!.");
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(mensagensDto);
             }
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario não encontrado.");
+            mensagensDto.setMensagem("Usuario não encontrado.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mensagensDto);
         }
     }
 
     @Override
+    @Transactional
     public ResponseEntity<Object> deletarUsuario(String nomeDoUsuario) {
+        MensagensDto mensagensDto = new MensagensDto();
         if (existsUsuarioByNomeDoUsuario(nomeDoUsuario)) {
-            usuarioRepository.deleteById(encontrarUsuarioPeloNomeDoUsuario(nomeDoUsuario).get().getId());
-            associadoService.deletarAssociado(encontrarUsuarioPeloNomeDoUsuario(nomeDoUsuario).get().getCpf());
-            return ResponseEntity.status(HttpStatus.OK).body("Usuario deletado");
+            Optional<Usuario> usuario = encontrarUsuarioPeloNomeDoUsuario(nomeDoUsuario);
+            if (usuario.isPresent()) {
+                associadoService.deletarAssociado(usuario.get().getCpf());
+                usuarioRepository.deleteById(usuario.get().getId());
+                mensagensDto.setMensagem("Usuario deletado");
+                return ResponseEntity.status(HttpStatus.OK).body(mensagensDto);
+            }
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
+            mensagensDto.setMensagem("Usuário não encontrado.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mensagensDto);
         }
+        mensagensDto.setMensagem("Usuário não encontrado.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mensagensDto);
     }
 
     @Override
