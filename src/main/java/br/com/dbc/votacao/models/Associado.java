@@ -16,7 +16,7 @@ public class Associado {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long Id;
+    private Long id;
 
     @CPF
     @Column(nullable = false, length = 20)
