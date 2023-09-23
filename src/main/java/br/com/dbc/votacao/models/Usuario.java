@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.Data;
-import org.hibernate.validator.constraints.br.CPF;
 
 import java.time.LocalDateTime;
 
@@ -19,7 +19,7 @@ public class Usuario {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long Id;
+    private Long id;
 
     @Column(nullable = false, unique = true, length = 50)
     private String nomeDoUsuario;
@@ -41,4 +41,8 @@ public class Usuario {
     @Column(nullable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime dataAtualizacao;
+
+    @Column(nullable = false)
+    @Email
+    private String email;
 }

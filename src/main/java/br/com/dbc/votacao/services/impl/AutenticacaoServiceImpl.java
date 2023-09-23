@@ -17,9 +17,9 @@ public class AutenticacaoServiceImpl implements AutenticacaoService {
 
 
     @Override
-    public ResponseEntity<Object> login(String nomeDoUsuario, String senha) {
-        if(usuarioService.existsUsuarioByNomeDoUsuario(nomeDoUsuario)){
-            Usuario usuario = usuarioService.encontrarUsuarioPeloNomeDoUsuario(nomeDoUsuario).get();
+    public ResponseEntity<Object> login(String email, String senha) {
+        if(usuarioService.existsUsuarioByEmail(email)){
+            Usuario usuario = usuarioService.findUsuarioByEmail(email).get();
             if(usuario.getSenha().equals(senha)){
                 UsuarioDto usuarioDto = usuarioService.converterUsuarioParaUsuarioDto(usuario);
                 usuarioDto.setAutenticado(true);
