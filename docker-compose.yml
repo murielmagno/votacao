@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+
+  db:
+    image: postgres:13
+    container_name: postgresdb
+    environment:
+      POSTGRES_DB: votacao
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+
+  spring-boot:
+    image: imagem-spring-boot
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: votacao-api
+    restart: always
+    ports:
+      - 8089:8089
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db/votacao
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    depends_on:
+      - db
