@@ -1,5 +1,6 @@
 package br.com.dbc.votacao.services.impl;
 
+import br.com.dbc.votacao.dtos.MensagensDto;
 import br.com.dbc.votacao.dtos.PautaDto;
 import br.com.dbc.votacao.enums.StatusPauta;
 import br.com.dbc.votacao.models.Pauta;
@@ -9,7 +10,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,15 +28,19 @@ public class PautaServiceImpl implements PautaService {
     public ResponseEntity<Object> cadastrarPauta(PautaDto pautaDto) {
         try {
             var pauta = new Pauta();
+            var mensagem = new MensagensDto();
             BeanUtils.copyProperties(pautaDto, pauta);
             pauta.setStatusPauta(StatusPauta.ABERTA);
             pauta.setDescricao(pautaDto.getDescricao());
             pauta.setDataCriacao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
             pauta.setDataAtualizacao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
             pautaRepository.save(pauta);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Pauta criada com sucesso.");
+            mensagem.setMensagem("Pauta criada com sucesso.");
+            return ResponseEntity.status(HttpStatus.CREATED).body(mensagem);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body(e.getMessage());
+            var mensagem = new MensagensDto();
+            mensagem.setMensagem(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body(mensagem);
         }
     }
 

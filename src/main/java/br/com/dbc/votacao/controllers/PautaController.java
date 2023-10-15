@@ -3,7 +3,6 @@ package br.com.dbc.votacao.controllers;
 import br.com.dbc.votacao.dtos.PautaDto;
 import br.com.dbc.votacao.models.Pauta;
 import br.com.dbc.votacao.services.PautaService;
-import br.com.dbc.votacao.specifications.SpecificationTemplate;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +27,11 @@ public class PautaController {
     @PostMapping("/cadastrar")
     public ResponseEntity<Object> cadastrarPauta(@RequestBody @Validated(PautaDto.PautaView.RegistroPauta.class)
                                                  @JsonView(PautaDto.PautaView.RegistroPauta.class) PautaDto pautaDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(pautaService.cadastrarPauta(pautaDto));
+        return pautaService.cadastrarPauta(pautaDto);
     }
 
     @GetMapping
-    public ResponseEntity<Page<Pauta>> buscarTodasAsPautas(@PageableDefault(page = 0, size = 10, sort = "descricao", direction = Sort.Direction.ASC)
+    public ResponseEntity<Page<Pauta>> buscarTodasAsPautas(@PageableDefault( sort = "descricao", direction = Sort.Direction.ASC)
                                                            Pageable pageable) {
         Page<Pauta> pautas = pautaService.buscarTodasAsPautas(pageable);
         return ResponseEntity.status(HttpStatus.OK).body(pautas);
